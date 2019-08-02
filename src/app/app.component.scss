@@ -1,0 +1,36 @@
+#name{
+    font-size: 5vw;
+}
+img{
+    width: 30%;
+    // position: relative;
+    // right: 10%;
+    display: block;
+    float: left;
+}
+a {
+    color:  #C30C0C;
+  }
+  
+  a:visited {
+    color: gray;
+  }
+  p, h2{
+      margin-bottom: 0;
+      margin-top: 0;
+
+  }
+  h2{
+      margin-top: 2vh;
+  }
+  hr{
+    margin-bottom: 5px;
+    margin-top: 5px;
+  }
+  em{
+      font-weight: bold;
+      margin-top: 5vh;
+  }
+  p{
+      margin-left: 3vw;
+  }
