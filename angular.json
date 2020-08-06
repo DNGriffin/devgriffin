@@ -31,9 +31,7 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "node_modules/phaser-ce/build/custom/pixi.js",
-              "node_modules/phaser-ce/build/custom/p2.js",
-              "node_modules/phaser-ce/build/custom/phaser-split.js"
+              "node_modules/phaser/dist/phaser.min.js"
               ]
           },
           "configurations": {

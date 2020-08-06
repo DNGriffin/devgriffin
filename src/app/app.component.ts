@@ -1,178 +1,244 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { Game, AUTO, Sprite, Graphics, Tween, Group, Image, Button, Sound, GameObjectCreator, CANVAS, Text } from 'phaser-ce';
 import { PathLocationStrategy } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
 
+import Phaser from 'phaser';
 
-
+var gameScope;
+var angScope;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit {
+export class AppComponent extends Phaser.Scene implements OnInit {
   @ViewChild('gameDiv', { static: true }) gameDiv: ElementRef;
-
+  config;
+  game;
+  gameHeight = window.innerHeight * 0.7;
   constructor() {
+    super("main");
+    if (!angScope) {
+      angScope = this;
+    }
+    if (angScope) {
+      gameScope = this;
+    }
 
+    this.config = {
+      type: Phaser.AUTO,
+      width: window.innerWidth,
+      height: window.innerHeight * 0.7,
+      parent: 'gameDiv',
+      physics: {
+        default: 'arcade',
+        arcade: {
+          debug: false,
+          // gravity: { y: 100 }
+        }
+      },
+      scene: [AppComponent]
+    };
   }
+
   ngOnInit() {
-    game = new Game(this.gameDiv.nativeElement.offsetWidth, this.gameDiv.nativeElement.offsetHeight, AUTO, 'gameDiv', { preload: preload, create: create, update: update });
+    this.game = new Phaser.Game(this.config);
   }
   title = 'Devin Griffin';
-}
-function preload() {
-  game.load.image("circle", "assets/game/circle.png");
-}
-var game: Game;
-var circle: Sprite;
-var texts = [];
-var textIndex = 0;
-var sentences = [
-  "B.S. in Computer Science. GPA: 3.61/4.0",
-  "Don Lang Scholar – full ride scholarship",
-  "Hagan Scholar – I manage a $15,000 Schwab investment account",
-  "Game Developer at Clear for Ears (Jun 2018 - Present)",
-  "Redesigned the entire suite of games to unify the graphic style and make them fun.",
-  "Used Phaser to create two new auditory rehabilitation games.",
-  "Used Angular and Firebase to redesign our website (previously AWS + PHP).",
-  "Interned Summer ’18 and stayed on since",
-  "Web Developer at Washington University G.I.S. (Oct 2017 - May 2018)",
-  "Used Ruby on Rails, GeoBlacklight, PostgreSQL, and the Boundless Suite to create a geospatial discovery web app to house WashU’s spatial data",
-  "Project Manager at DevSTAC (Sept 2017 - May 2018)",
-  "Lead a team that used formidable forms and the Service Now API to digitize incident report forms for Barnes Jewish Hospital",
-  "Teacher's Assistant at Washington University (Jan 2018 - Present)",
-  "Web Development for 3 semesters (Spring ‘18, Fall ‘18, Spring ‘19).",
-  "Introduction to Computer Security (Fall ’19)",
-  "       Projects        ",
-  "Elemental Fighter - Multiplayer 2D pixel art game that features lag free networking",
-  "Gamified Math Learning Platform - Online math learning platform that lets students compete against each other in math games.",
-  "Sello (Letgo for Universities) - iOS buying and selling platform for college students",
-  "Family Fun Center App - App that keeps track of schedule and hours worked by employees of a family fun center.",
-  "        Awards        ",
-  "3rd in Programming and Coding at Missouri FBLA State Convention",
-  "4th in Computer Programming at Missouri State Pummel Relays",
-  "9th in Computer Problem Solving at Missouri FBLA State Convention",
-  "Won Y’s Thoughts Entrepreneurship challenge with a Table Tennis Matchmaking app.",
-  "Proficient: Java, JavaScript, TypeScript, Phaser",
-  "Basic: Python, C++, C#, Arduino C, PHP, Swift, React, Angular, Unity, Firebase, AWS, jQuery, MySQL",
-  "Classes (1/2) Data Structures and Algorithms, Computer Science II (Arduino Class), Web Development, Object-Oriented Software Development Laboratory (C++)",
-  "Classes (2/2) Rapid Prototype Development and Creative Programming (Full Stack Web Dev), Mobile Application Development (iOS Dev in Swift), Introduction to Computer Security, Video Game Programming (Unity)",
-]
-var sentenceIndex = 0;
-var mainText: Text;
-var scoreText: Text;
-var score = 0;
-function create() {
-  circle = game.add.sprite(game.height * .10, game.height * .10, "circle");
-  circle.height = game.height * .20;
-  circle.width = game.height * .20;
-  circle.anchor.set(0.5);
-  game.physics.startSystem(Phaser.Physics.ARCADE);
-  game.physics.arcade.gravity.y = game.height * .5;
+  preload() {
+    this.cameras.main.setBackgroundColor("#F6F5ED");
+    this.load.image("umbrella", "assets/game/umbrella.png");
+    this.load.image("droplet", "assets/game/droplet.png");
 
-  game.stage.backgroundColor = "#F6F5ED";
-  mainText = game.add.text(game.world.centerX, game.world.centerY, "Click to start the game!");
-  mainText.anchor.set(0.5);
-  mainText.fontSize = 0.5 * fontSizer(mainText, game);
-
-
-  var text1 = game.add.text(game.width, 0, "Click to jump, when you collide with any text, you lose!");
-  var text2 = game.add.text(game.width * 1.75, 0, "My name is Devin Griffin and I study Computer Science at Washington University");
-  text1.fontSize = 0.75 * fontSizer(text1, game);
-  text2.fontSize = 0.75 * fontSizer(text2, game);
-
-  texts.push(text1);
-  texts.push(text2);
-
-  game.physics.enable([circle, text1, text2], Phaser.Physics.ARCADE);
-  circle.body.collideWorldBounds = true;
-  for (var i = 0; i < texts.length; i++) {
-    texts[i].body.allowGravity = false;
-  }
-  scoreText = game.add.text(game.width * .10, 0, "Score: 0");
-  scoreText.fontSize = 0.35 * fontSizer(scoreText, game);
-  scoreText.y += scoreText.height;
-
-
-
-
-}
-
-var pointerReleased = true;
-var gameStarted = false;
-var frames = 0;
-var topScore = 0;
-function update() {
-  if (game.input.activePointer.isDown && !gameStarted && canStart) {
-    startGame();
-  }
-  if (gameStarted) {
-    circle.angle += 8;
-    if (++frames % 120 == 0) {
-      score++;
-      scoreText.text = `Score: ${score}`;
-    }
-  }
-
-  if (!game.input.activePointer.isDown) {
-    pointerReleased = true;
-  }
-  if (game.physics.arcade.collide(circle, [texts[0], texts[1]])) {
-    stopGame();
 
   }
-  if (game.input.activePointer.isDown && pointerReleased) {
-    circle.body.velocity.y -= game.height * 0.5;
-    pointerReleased = false;
-  }
-  for (var i = 0; i < texts.length; i++) {
-    if (texts[i].x + texts[i].width < 0) {
-      if (i == 0) {
-        texts[i].x = texts[1].x + game.width * 1;
-      } else {
-        texts[i].x = texts[0].x + game.width * 1;
-      }
-      if (sentenceIndex >= sentences.length) {
-        sentenceIndex = 0;
-      }
-      texts[i].text = String(sentences[sentenceIndex++]);
-      texts[i].fontSize = 0.75 * fontSizer(texts[i], game);
-      texts[i].y = game.height * 0.1 + game.height * 0.8 * Math.random();
-    }
-  }
-}
-function fontSizer(text, frame) {
-  var fontSize = 80;
-  text.fontSize = fontSize;
-  while (text.width > frame.width) {
-    fontSize -= 1;
-    text.fontSize = fontSize;
-  }
-  text.fontSize = fontSize * 0.98;
-  return fontSize * 0.98;
-}
-var canStart = true;
-function stopGame() {
-  canStart = false;
-  setTimeout(function () { canStart = true }, 2000);
-  gameStarted = false;
-  for (var i = 0; i < texts.length; i++) {
-    texts[i].body.velocity.x = 0;
-  }
-  topScore = Math.max(topScore, score);
-  mainText.text = `You earned a score of ${score}\nYour top score is ${topScore}\nClick to play again.`;
-  mainText.visible = true;
-  texts[0].x = game.width;
-  texts[1].x = game.width * 2;
+  umbrella: Phaser.GameObjects.Sprite;
   score = 0;
-}
-function startGame() {
-  scoreText.text = `Score: ${score}`;
-  mainText.visible = false;
-  gameStarted = true;
-  for (var i = 0; i < texts.length; i++) {
-    texts[i].body.velocity.x = -game.width * .2;
-    texts[i].body.velocity.y = 0;
+  highScore = 0;
+  completed = false;
+  incrementScore() {
+    angScope.score++;
+    angScope.highScore = Math.max(angScope.highScore, angScope.score);
   }
+  resetScore() {
+    angScope.score = 0;
+  }
+  droplets = [];
+  dropletIndex = 0;
+  spawnDroplet() {
+    if (this.gamePaused) {
+      return;
+    }
+    var isUpsideDown = false
+    if (this.spawnUpsideDown && Math.random() < 0.5) {
+      isUpsideDown = true;
+    }
+    var droplet: Phaser.Physics.Arcade.Sprite;
+    if (isUpsideDown) {
+      droplet = this.physics.add.sprite(Phaser.Math.Between(innerWidth * 0.1, innerWidth * 0.9), this.gameHeight * 1.2, "droplet").setVelocityY(-this.gameHeight / 5);
+      droplet.flipY = true;
+    } else {
+      droplet = this.physics.add.sprite(Phaser.Math.Between(innerWidth * 0.1, innerWidth * 0.9), -this.gameHeight / 5, "droplet").setVelocityY(this.gameHeight / 5);
+
+    }
+    droplet.name = "alive";
+    droplet.displayWidth = innerWidth * 0.05;
+    droplet.scaleY = droplet.scaleX;
+    setTimeout(() => {
+      if (droplet.name == "alive") { this.spawnDroplet() };
+      droplet.destroy();
+    }, 6000);
+    this.physics.add.overlap(droplet, this.umbrella, this.umbrellaCollide, null, this);
+    this.physics.add.overlap(droplet, this.sentenceSprites, this.textCollide, null, this);
+    this.droplets[(this.dropletIndex++) % 5] = droplet;
+
+    // setTimeout(()=>{this.spawnDroplet()}, 6000);
+  }
+  getFurtherestRightSentence() {
+    var maxX = this.sentenceSprites[0].x;
+    var furtherestSentence = this.sentenceSprites[0];
+    console.log(maxX);
+    this.sentenceSprites.forEach(sentence => {
+      if (sentence.x > maxX) {
+        maxX = sentence.x;
+        furtherestSentence = sentence;
+      }
+    });
+    return furtherestSentence;
+  }
+  umbrellaCollide(droplet, umbrella) {
+    droplet.destroy();
+    droplet.name = "dead";
+    this.incrementScore();
+    this.spawnDroplet();
+  }
+  gamePaused = false;
+  endGame() {
+    this.resetScore();
+    alert("You let the text get rained on, score reset. Click the umbrella to resume the game. ")
+    this.gamePaused = true;
+    this.sentenceSprites.forEach(sentence => {
+      sentence.body.velocity.x = 0
+    });
+    this.droplets.forEach(droplet => {
+      droplet.destroy();
+    });
+  }
+  textCollide(droplet, text) {
+    droplet.destroy();
+    this.endGame();
+    // this.restartGame();
+  }
+  resumeGame() {
+    if(!this.gamePaused){
+      return;
+    }
+    this.gamePaused = false;
+    this.sentenceSprites.forEach(sentence => {
+      sentence.body.velocity.x = -innerWidth / 4;
+    });
+    this.spawnDroplet();
+    setTimeout(() => { this.spawnDroplet(); }, 500);
+    setTimeout(() => { this.spawnDroplet(); }, 100);
+    setTimeout(() => { this.spawnDroplet(); }, 1500);
+    setTimeout(() => { this.spawnDroplet(); }, 2000);
+  }
+  spawnUpsideDown = false;
+  create() {
+    setTimeout(() => { this.spawnDroplet(); }, 500);
+    setTimeout(() => { this.spawnDroplet(); }, 100);
+    setTimeout(() => { this.spawnDroplet(); }, 1500);
+    setTimeout(() => { this.spawnDroplet(); }, 2000);
+    setTimeout(() => { this.spawnUpsideDown = true }, 3000);
+    this.createText();
+    this.umbrella = this.physics.add.sprite(innerWidth / 2, this.gameHeight * 0.2, "umbrella")
+    this.umbrella.setInteractive();
+    this.umbrella.displayWidth = innerWidth / 10;
+    this.umbrella.scaleY = this.umbrella.scaleX;
+    this.input.setDraggable(this.umbrella);
+    this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+      
+      gameObject.x = dragX;
+      gameObject.y = dragY;
+    });
+    this.input.on('pointerdown', (pointer, gameObject, dragX, dragY) => {
+      console.log("pointer down");
+      this.resumeGame();
+    });
+    
+    this.spawnDroplet();
+
+
+
+  }
+  restartGame() {
+    this.sentenceSprites.forEach(sentence => {
+      sentence.destroy();
+    });
+    this.sentenceSprites = [];
+    this.scene.stop("main"); this.scene.restart()
+  }
+  sentenceIndex = 0;
+  sentenceSprites = [];
+  createText() {
+    for (var i = 0; i < 3; i++) {
+      var sentenceSprite;
+      sentenceSprite = this.add.text(innerWidth / 2, this.gameHeight / 2, this.sentences[this.sentenceIndex++]).setOrigin(0, 0.5).setFontSize(innerHeight * 0.1).setFontFamily('Verdana, "Times New Roman", Tahoma, serif').setFill("black");
+      this.physics.world.enable(sentenceSprite);
+      sentenceSprite.body.velocity.x = -innerWidth / 4;
+      this.sentenceSprites.push(sentenceSprite);
+    }
+    this.sentenceSprites[0].x = innerWidth;
+    this.sentenceSprites[1].x = this.sentenceSprites[0].x + this.sentenceSprites[0].displayWidth + innerWidth / 6;
+    this.sentenceSprites[2].x = this.sentenceSprites[1].x + this.sentenceSprites[1].displayWidth + innerWidth / 6;
+
+  }
+  update() {
+    if (this.umbrella.y > this.gameHeight / 2) {
+      this.umbrella.flipY = true;
+    } else {
+      this.umbrella.flipY = false;
+    }
+
+    this.sentenceSprites.forEach(sentence => {
+      if (sentence.x + sentence.displayWidth < 0) {
+        this.sentenceIndex++;
+        this.sentenceIndex %= this.sentences.length;
+        
+        sentence.setText(this.sentences[this.sentenceIndex])
+        sentence.x = this.getFurtherestRightSentence().x + this.getFurtherestRightSentence().displayWidth + innerWidth / 6;
+      }
+    });
+  }
+  sentences = [
+    "B.S. in Computer Science. GPA: 3.64/4.0",
+    "Don Lang Scholar – full ride scholarship",
+    "Hagan Scholar – I manage a $15,000 Schwab investment account",
+    "Game Developer at Clear for Ears (Jun 2018 - Present)",
+    "Redesigned the entire suite of games to unify the graphic style and make them fun.",
+    "Used Phaser to create two new auditory rehabilitation games.",
+    "Used Angular and Firebase to redesign our website (previously AWS + PHP).",
+    "Interned Summer ’18 and stayed on since",
+    "Web Developer at Washington University G.I.S. (Oct 2017 - May 2018)",
+    "Used Ruby on Rails, GeoBlacklight, PostgreSQL, and the Boundless Suite to create a geospatial discovery web app to house WashU’s spatial data",
+    "Project Manager at DevSTAC (Sept 2017 - May 2018)",
+    "Lead a team that used formidable forms and the Service Now API to digitize incident report forms for Barnes Jewish Hospital",
+    "Teacher's Assistant at Washington University (Jan 2018 - Present)",
+    "Web Development for 3 semesters (Spring ‘18, Fall ‘18, Spring ‘19).",
+    "Introduction to Computer Security (Fall ’19)",
+    "       Projects        ",
+    "Elemental Fighter - Multiplayer 2D pixel art game that features lag free networking",
+    "Gamified Math Learning Platform - Online math learning platform that lets students compete against each other in math games.",
+    "Sello (Letgo for Universities) - iOS buying and selling platform for college students",
+    "Family Fun Center App - App that keeps track of schedule and hours worked by employees of a family fun center.",
+    "        Awards        ",
+    "3rd in Programming and Coding at Missouri FBLA State Convention",
+    "4th in Computer Programming at Missouri State Pummel Relays",
+    "9th in Computer Problem Solving at Missouri FBLA State Convention",
+    "Won Y’s Thoughts Entrepreneurship challenge with a Table Tennis Matchmaking app.",
+    "Proficient: Java, JavaScript, TypeScript, Phaser",
+    "Basic: Python, C++, C#, Arduino C, PHP, Swift, React, Angular, Unity, Firebase, AWS, jQuery, MySQL",
+    "Classes (1/2) Data Structures and Algorithms, Computer Science II (Arduino Class), Web Development, Object-Oriented Software Development Laboratory (C++)",
+    "Classes (2/2) Rapid Prototype Development and Creative Programming (Full Stack Web Dev), Mobile Application Development (iOS Dev in Swift), Introduction to Computer Security, Video Game Programming (Unity)",
+  ]
 }
