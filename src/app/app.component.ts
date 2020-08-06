@@ -52,6 +52,7 @@ export class AppComponent extends Phaser.Scene implements OnInit {
 
 
   }
+  gameText;
   umbrella: Phaser.GameObjects.Sprite;
   score = 0;
   highScore = 0;
@@ -92,7 +93,6 @@ export class AppComponent extends Phaser.Scene implements OnInit {
     this.physics.add.overlap(droplet, this.sentenceSprites, this.textCollide, null, this);
     this.droplets[(this.dropletIndex++) % 5] = droplet;
 
-    // setTimeout(()=>{this.spawnDroplet()}, 6000);
   }
   getFurtherestRightSentence() {
     var maxX = this.sentenceSprites[0].x;
@@ -112,7 +112,7 @@ export class AppComponent extends Phaser.Scene implements OnInit {
     this.incrementScore();
     this.spawnDroplet();
   }
-  gamePaused = false;
+  gamePaused = true;
   endGame() {
     this.resetScore();
     alert("You let the text get rained on, score reset. Click the umbrella to resume the game. ")
@@ -121,6 +121,7 @@ export class AppComponent extends Phaser.Scene implements OnInit {
       sentence.body.velocity.x = 0
     });
     this.droplets.forEach(droplet => {
+      droplet.name = "dead";
       droplet.destroy();
     });
   }
@@ -130,9 +131,10 @@ export class AppComponent extends Phaser.Scene implements OnInit {
     // this.restartGame();
   }
   resumeGame() {
-    if(!this.gamePaused){
+    if (!this.gamePaused) {
       return;
     }
+    this.gameText.setVisible(false);
     this.gamePaused = false;
     this.sentenceSprites.forEach(sentence => {
       sentence.body.velocity.x = -innerWidth / 4;
@@ -157,7 +159,7 @@ export class AppComponent extends Phaser.Scene implements OnInit {
     this.umbrella.scaleY = this.umbrella.scaleX;
     this.input.setDraggable(this.umbrella);
     this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
-      
+
       gameObject.x = dragX;
       gameObject.y = dragY;
     });
@@ -165,7 +167,7 @@ export class AppComponent extends Phaser.Scene implements OnInit {
       console.log("pointer down");
       this.resumeGame();
     });
-    
+
     this.spawnDroplet();
 
 
@@ -181,11 +183,13 @@ export class AppComponent extends Phaser.Scene implements OnInit {
   sentenceIndex = 0;
   sentenceSprites = [];
   createText() {
+    this.gameText = this.add.text(innerWidth / 2, this.gameHeight / 2, "Click on the umbrella to start the game.\nDrag the umbrella to keep the text dry.").setOrigin(0.5, 0.5).setFontSize(innerWidth * 0.035).setFontFamily('Verdana, "Times New Roman", Tahoma, serif').setFill("black");
+
     for (var i = 0; i < 3; i++) {
       var sentenceSprite;
       sentenceSprite = this.add.text(innerWidth / 2, this.gameHeight / 2, this.sentences[this.sentenceIndex++]).setOrigin(0, 0.5).setFontSize(innerHeight * 0.1).setFontFamily('Verdana, "Times New Roman", Tahoma, serif').setFill("black");
       this.physics.world.enable(sentenceSprite);
-      sentenceSprite.body.velocity.x = -innerWidth / 4;
+      // sentenceSprite.body.velocity.x = -innerWidth / 4;
       this.sentenceSprites.push(sentenceSprite);
     }
     this.sentenceSprites[0].x = innerWidth;
@@ -204,7 +208,7 @@ export class AppComponent extends Phaser.Scene implements OnInit {
       if (sentence.x + sentence.displayWidth < 0) {
         this.sentenceIndex++;
         this.sentenceIndex %= this.sentences.length;
-        
+
         sentence.setText(this.sentences[this.sentenceIndex])
         sentence.x = this.getFurtherestRightSentence().x + this.getFurtherestRightSentence().displayWidth + innerWidth / 6;
       }
