@@ -61,6 +61,8 @@ export class AppComponent extends Phaser.Scene implements OnInit {
   isPhone = false;
   gameText;
   umbrella: Phaser.GameObjects.Sprite;
+  umbrellaScale;
+  umbrellaTween: Phaser.Tweens.Tween;
   score = 0;
   highScore = 0;
   completed = false;
@@ -90,7 +92,7 @@ export class AppComponent extends Phaser.Scene implements OnInit {
 
     }
     droplet.name = "alive";
-    droplet.displayWidth = innerWidth * 0.05;
+    droplet.displayWidth = Phaser.Math.Between(innerWidth * 0.03, innerWidth * 0.06);
     droplet.scaleY = droplet.scaleX;
     setTimeout(() => {
       if (droplet.name == "alive") { this.spawnDroplet() };
@@ -125,8 +127,11 @@ export class AppComponent extends Phaser.Scene implements OnInit {
     this.resetScore();
 
     this.gameText.setVisible(true);
-    this.gameText.setText("You let the text get rained on, score reset.\nClick to resume the game. ")
-    
+    this.gameText.setText("You let the text get rained on, score reset.\nClick to resume the game\nOr, scroll down to read my resume.")
+    this.umbrellaTween.remove();
+    this.umbrella.scaleX = this.umbrellaScale;
+    this.umbrella.scaleY = this.umbrellaScale;
+
     this.gamePaused = true;
     this.sentenceSprites.forEach(sentence => {
       sentence.body.velocity.x = 0
@@ -144,6 +149,13 @@ export class AppComponent extends Phaser.Scene implements OnInit {
     if (!this.gamePaused || !this.canResumeGame) {
       return;
     }
+    this.umbrellaTween = this.tweens.add({
+      targets: this.umbrella,
+      scale: { from: this.umbrellaScale, to: this.umbrellaScale * 0.4 },
+      ease: 'linear',
+      duration: 15000,
+    });
+
     setTimeout(() => { this.spawnUpsideDown = true }, 10000);
     this.gameText.setVisible(false);
     this.gamePaused = false;
@@ -167,6 +179,7 @@ export class AppComponent extends Phaser.Scene implements OnInit {
       this.umbrella.displayWidth = innerWidth / 10;
     }
     this.umbrella.scaleY = this.umbrella.scaleX;
+    this.umbrellaScale = this.umbrella.scaleY;
     this.input.on('pointerdown', (pointer, gameObject, dragX, dragY) => {
       console.log("pointer down");
       this.resumeGame();
@@ -230,31 +243,27 @@ export class AppComponent extends Phaser.Scene implements OnInit {
   }
   sentences = [
     "Resume Content (Shortened for game)",
-    "Washington University Fall 2017 - May 2021",
-    "B.S. in Computer Science. GPA: 3.64/4.0",
-    "Don Lang Scholar – full ride scholarship.",
-    "Hagan Scholar – I manage a ~$17,000 Schwab investment account.",
-    "Work Experience",
+    "Gradutaed from WashU with a B.S. in Computer Science. GPA: 3.65/4.0",
+    "Work Experience:",
+    "Software Engineer at AT&T (July 2021 - Present)",
     "Software Engineer Intern at AT&T (Jun 2020 - Aug 2020)",
-    "Game Developer at Clear for Ears (Jun 2018 - Present)",
-    "Web Developer at Washington University G.I.S. (Oct 2017 - May 2018)",
-    "Project Manager at DevSTAC (Sept 2017 - May 2018)",
+    "Full-stack Web Developer at Amptify (Jun 2018 - June 2021)",
+    "Full-stack Web Developer at Washington University G.I.S. (Oct 2017 - May 2018)",
     "Teacher's Assistant at Washington University (Jan 2018 - Jan 2020)",
-    "Coin Toss (2020) - iOS App and Web App that uses simulation games to make unimportant decisions for you (ex: which coffee should I get today). Angular, Firebase, Phaser",
+    "Projects:",
+    "Coin Toss (2020) - iOS App and Web App that uses simulation games to make decisions for you.",
     "Published in Apple App Store (CoinTossDecisions)",
-    "Pong Command Line Edition (2020) - Created a two player, single player, and single player vs ai pong game. LibGDX",
-    "Multiplayer Math (2019) - High School & College course supplement tool where students respond to instructor questions by playing networked cooperative games. Angular + Firebase",
-    "Elemental Fighter (2019) - Multiplayer 2D pixel art game that features lag free networking and skill-based combat. Unity2D",
-    "Math Battles (2018) - Online math learning platform that lets students compete against each other in math games, to provide an incentive to learn math. React, Phaser, MySQL, SocketIO",
-    "Sello (Letgo for Universities) (2018) - iOS buying and selling platform for college students which allows you to filter by University. Swift, Firebase",
-    "Family Fun Center App (2017) - App that keeps track of schedule and hours worked by employees of a family fun center. Python, SQLite, Kivy",
+    "Multiplayer Math (2019) - High School & College course supplement tool where students respond to instructor questions by playing networked cooperative games.",
+    "Elemental Fighter (2019) - Multiplayer 2D pixel art game that features lag free networking and skill-based combat.",
+    "Math Battles (2018) - Online math learning platform that lets students compete against each other in math games, to provide an incentive to learn math.",
+    "Sello (Letgo for Universities) (2018) - iOS buying and selling platform for college students which allows you to filter by University.",
     "Awards",
     "3rd in Programming and Coding at Missouri FBLA State Convention",
     "4th in Computer Programming at Missouri State Pummel Relays",
-    "9th in Computer Problem Solving at Missouri FBLA State Convention",
     "Won Y’s Thoughts Entrepreneurship challenge with a Table Tennis Matchmaking app.",
-    "Proficient: Java, JavaScript, TypeScript, Phaser, Angular, Firebase",
-    "Basic: Python, C++, C#, Arduino C, PHP, Swift, React, Unity, AWS, jQuery, MySQL",
+    "Technologies:",
+    "Proficient: Java, JavaScript, TypeScript, Phaser, Angular, React, Firebase, Python, Jenkins, Jira",
+    "Basic: C++, C#, Arduino C, PHP, Swift, Unity, AWS, jQuery, MySQL",
     "Relevant Classes: Data Structures and Algorithms, Computer Science II (Arduino Class)",
     "Web Development, Object-Oriented Software Development Laboratory (C++), Rapid Prototype Development and Creative Programming (Full Stack Web Dev)",
     "Mobile Application Development (iOS Dev in Swift), Introduction to Computer Security, Video Game Programming (Unity), Analysis of Algorithms",
