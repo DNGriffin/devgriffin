@@ -243,7 +243,7 @@ export class AppComponent extends Phaser.Scene implements OnInit {
   }
   sentences = [
     "Resume Content (Shortened for game)",
-    "Gradutaed from WashU with a B.S. in Computer Science. GPA: 3.65/4.0",
+    "Gradutaed from WashU with a B.S. in Computer Science. GPA: 3.7/4.0",
     "Work Experience:",
     "Software Engineer at AT&T (July 2021 - Present)",
     "Software Engineer Intern at AT&T (Jun 2020 - Aug 2020)",
